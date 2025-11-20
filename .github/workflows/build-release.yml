@@ -33,20 +33,25 @@ jobs:
           echo "apk=$APK" >> $GITHUB_OUTPUT
           echo "Found APK: $APK"
 
-      - name: Create release
+      # 1️⃣ Create Release only (NO file upload here)
+      - name: Create GitHub Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: "Trading App v1.0.${{ github.run_number }}"
+          release_name: "Trading App v1.0.${{ github.run_number }}"
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload APK to GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ steps.apk.outputs.apk }}
+      # 2️⃣ Upload APK to Release (now works properly)
+      - name: Upload APK asset
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.apk.outputs.apk }}
+          asset_name: app-debug.apk
+          asset_content_type: application/vnd.android.package-archive
