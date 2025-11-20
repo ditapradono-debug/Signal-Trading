@@ -29,11 +29,8 @@ jobs:
       - name: Find built APK
         id: apk
         run: |
-          APK=$(find $GITHUB_WORKSPACE -name "*debug.apk" | head -n 1)
-          echo "apk=$APK" >> $GITHUB_OUTPUT
-          echo "Found APK: $APK"
+          echo "apk=android-app/app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_OUTPUT
 
-      # 1️⃣ Create Release only (NO file upload here)
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -45,13 +42,12 @@ jobs:
           draft: false
           prerelease: false
 
-      # 2️⃣ Upload APK to Release (now works properly)
       - name: Upload APK asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.apk.outputs.apk }}
+          asset_path: android-app/app/build/outputs/apk/debug/app-debug.apk
           asset_name: app-debug.apk
           asset_content_type: application/vnd.android.package-archive
